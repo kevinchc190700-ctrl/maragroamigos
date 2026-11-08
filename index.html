@@ -137,7 +137,7 @@ onAuthStateChanged(auth, async u => {
     if (!c.exists() || c.data().activo !== true || !l.exists()) {
       $("nombre").textContent = "Sin acceso";
       $("marcar").textContent = "No disponible";
-      setMsg("Tu usuario no está habilitado. Habla con el administrador.", "err");
+      setMsg("Tu usuario no está habilitado. " + (!c.exists() ? "No existe colaboradores/" + ced + "." : c.data().activo !== true ? "El campo activo no es verdadero." : "Falta config/lugar."), "err");
       return;
     }
     $("nombre").textContent = c.data().nombre;
