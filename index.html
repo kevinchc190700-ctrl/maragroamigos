@@ -182,9 +182,10 @@ function pintar() {
     let barra = "", tot = "Falta salida";
     if (x.entrada && x.salida) {
       const a = p(dec(loc(x.entrada))), s = p(dec(loc(x.salida)));
+      const dsem = new Date(Date.UTC(y, mo, d)).getUTCDay(), esFin = dsem === 0 || dsem === 6;
       barra = '<div class="bar" style="left:' + a + '%;width:' + (s - a) + '%"></div>' +
-              '<div class="lun" style="left:' + p(12) + '%;width:' + (p(13) - p(12)) + '%"></div>';
-      const min = Math.max(0, (x.salida - x.entrada) / 6e4 - (lugar.almuerzoMin || 60));
+              (esFin ? "" : '<div class="lun" style="left:' + p(12) + '%;width:' + (p(13) - p(12)) + '%"></div>');
+      const min = Math.max(0, (x.salida - x.entrada) / 6e4 - (esFin ? 0 : (lugar.almuerzoMin || 60)));
       total += min;
       tot = fmt(min);
     }
