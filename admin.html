@@ -78,8 +78,7 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 <div class="card bar2">
 <select id="quin"></select>
 <button class="btn" id="xls">Exportar a Excel</button>
-<span class="muted">Total horas = tiempo entre entrada y salida menos el almuerzo.</span>
-</div>
+<span class="muted">Total horas = tiempo entre entrada y salida menos el almuerzo (sábado y domingo no se descuenta).</span>
 <div class="card scroll">
 <table><thead><tr><th>Nombre completo</th><th>Cédula</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Total horas</th><th>Tardanza</th><th>Tiempo extra</th><th>Estado</th></tr></thead><tbody id="b-rep"></tbody></table>
 </div>
@@ -228,7 +227,7 @@ async function pintarRep() {
       const f = x.f, esFin = f.getUTCDay() === 0 || f.getUTCDay() === 6;
       let h = null, t = 0, xx = 0, est = esFin ? "Fin de semana" : "Completo";
       if (x.entrada && x.salida) {
-        h = Math.max(0, (x.salida - x.entrada) / 6e4 - alm);
+        h = Math.max(0, (x.salida - x.entrada) / 6e4 - (esFin ? 0 : alm));
         const e = mins(x.entrada), s = mins(x.salida);
         if (esFin) xx = h; else { t = Math.max(0, e - aE); xx = Math.max(0, aE - e) + Math.max(0, s - aS); }
         tH += h; tT += t; tX += xx;
