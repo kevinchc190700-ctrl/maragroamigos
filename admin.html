@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MarAgroAmigos – Administrador</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F6F7F2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1B2A1E}
+.wrap{max-width:1100px;margin:0 auto;padding:20px}
+.card{background:#fff;border-radius:16px;padding:18px 20px;margin-bottom:16px}
+.muted{color:#4F5F52;font-size:13px}
+h1{font-size:22px;margin:0}
+header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+header img{height:56px;width:auto}
+header h1{flex:1}
+label{font-size:14px;font-weight:600;display:block;margin-top:14px}
+input[type=text],input[type=password],select{width:100%;max-width:360px;height:46px;border:1px solid #C9D2C4;border-radius:10px;padding:0 12px;font-size:16px;margin-top:6px;background:#fff}
+.btn{height:44px;padding:0 18px;border:0;border-radius:10px;background:#2F6B3A;color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.btn.sec{background:#fff;color:#2F6B3A;border:1px solid #2F6B3A}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tabs .btn:not(.on){background:#fff;color:#2F6B3A;border:1px solid #2F6B3A}
+.cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.cards div{flex:1;min-width:140px;background:#fff;border-radius:14px;padding:14px 16px}
+.cards b{display:block;font-size:28px;margin-top:2px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;color:#4F5F52;padding:10px;border-bottom:1px solid #E6EADF;font-size:13px;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid #EEF1E9;white-space:nowrap}
+tr.sub td{background:#F1F5EE;font-weight:700}
+.tag{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.ok{background:#DDEFE0;color:#1F5129}.warn{background:#FBE7CC;color:#7A3F08}.gris{background:#ECEFE8;color:#3D4A40}.azul{background:#E3E8F5;color:#27407A}
+.err{color:#B3261E;font-weight:600;font-size:14px;margin-top:10px}
+.hide{display:none!important}
+.bar2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar2 select{margin:0}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+<header>
+<img src="agroamigos-logo.png" alt="AgroAmigos">
+<h1>Panel del administrador</h1>
+<button class="btn sec hide" id="salir">Salir</button>
+</header>
+
+<section id="login" class="card" style="max-width:420px">
+<form id="form">
+<label for="ced">Número de cédula</label>
+<input type="text" id="ced" autocomplete="username" autocapitalize="none" autocorrect="off" required>
+<label for="pass">Contraseña</label>
+<input type="password" id="pass" autocomplete="current-password" required>
+<div style="margin-top:16px"><button class="btn" type="submit">Entrar</button></div>
+<div class="err" id="lmsg"></div>
+</form>
+</section>
+
+<div id="panel" class="hide">
+<div class="tabs">
+<button class="btn on" id="t-hoy">Hoy</button>
+<button class="btn" id="t-rep">Reporte quincenal</button>
+</div>
+<div class="err" id="msg"></div>
+
+<section id="v-hoy">
+<div class="cards">
+<div><span class="muted">Trabajando ahora</span><b id="c-tr">0</b></div>
+<div><span class="muted">Jornada completa</span><b id="c-ok">0</b></div>
+<div><span class="muted">Sin marcar</span><b id="c-sin">0</b></div>
+</div>
+<div class="card scroll">
+<table><thead><tr><th>Nombre completo</th><th>Cédula</th><th>Entrada</th><th>Salida</th><th>Estado</th></tr></thead><tbody id="b-hoy"></tbody></table>
+</div>
+</section>
+
+<section id="v-rep" class="hide">
+<div class="card bar2">
+<select id="quin"></select>
+<button class="btn" id="xls">Exportar a Excel</button>
+<span class="muted">Total horas = tiempo entre entrada y salida menos el almuerzo.</span>
+</div>
+<div class="card scroll">
+<table><thead><tr><th>Nombre completo</th><th>Cédula</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Total horas</th><th>Tardanza</th><th>Tiempo extra</th><th>Estado</th></tr></thead><tbody id="b-rep"></tbody></table>
+</div>
+</section>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCISZZdYvOd4npRtDFqGHdo4ikDft5H17g",
+  authDomain: "maragroamigos.firebaseapp.com",
+  projectId: "maragroamigos",
+  storageBucket: "maragroamigos.firebasestorage.app",
+  messagingSenderId: "123263602492",
+  appId: "1:123263602492:web:0870844028f4d52e22d839"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+const DOMINIO = "@maragroamigos.app";
+const $ = id => document.getElementById(id);
+const norm = s => s.trim().toLowerCase().replace(/[\s-]/g, "");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+let colabs = [], lugar = {}, filas = [];
+
+// Hora de Nicaragua (UTC-6): reloj desplazado, se lee con getUTC*
+const loc = ms => new Date(ms - 6 * 36e5);
+const dkey = d => d.getUTCFullYear() + "-" + (d.getUTCMonth() + 1) + "-" + d.getUTCDate();
+const hm = d => d.getUTCHours() + ":" + String(d.getUTCMinutes()).padStart(2, "0");
+const mins = ms => { const d = loc(ms); return d.getUTCHours() * 60 + d.getUTCMinutes(); };
+const hhmm = s => { const p = s.split(":"); return +p[0] * 60 + +p[1]; };
+const fmt = min => { const m = Math.round(min); return Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0"); };
+const fmtMin = m => m ? Math.round(m) + " min" : "—";
+const err = (el, er) => { $(el).textContent = "Error: " + (er.code || er.message); };
+
+// ---- Inicio de sesión ----
+$("ced").value = localStorage.getItem("ced") || "";
+$("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  $("lmsg").textContent = "Entrando…";
+  try {
+    await signInWithEmailAndPassword(auth, norm($("ced").value) + DOMINIO, $("pass").value);
+    localStorage.setItem("ced", $("ced").value.trim());
+    $("pass").value = "";
+  } catch (er) {
+    const malos = ["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found", "auth/invalid-email"];
+    $("lmsg").textContent = malos.includes(er.code) ? "Cédula o contraseña incorrecta." : "No se pudo entrar. Revisa tu conexión.";
+  }
+});
+$("salir").onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async u => {
+  $("login").classList.toggle("hide", !!u);
+  $("panel").classList.add("hide");
+  $("salir").classList.toggle("hide", !u);
+  if (!u) return;
+  const ced = u.email.split("@")[0];
+  try {
+    const a = await getDoc(doc(db, "admins", ced));
+    if (!a.exists()) {
+      await signOut(auth);
+      $("lmsg").textContent = "Esta cuenta no tiene acceso de administrador.";
+      return;
+    }
+    $("lmsg").textContent = "";
+    const [c, l] = await Promise.all([getDocs(collection(db, "colaboradores")), getDoc(doc(db, "config", "lugar"))]);
+    colabs = c.docs.map(d => ({ id: d.id, ...d.data() }));
+    lugar = l.exists() ? l.data() : {};
+    llenarQuincenas();
+    $("panel").classList.remove("hide");
+    $("msg").textContent = "";
+    await pintarHoy();
+  } catch (er) { $("lmsg").textContent = "Error: " + (er.code || er.message); }
+});
+
+// ---- Pestañas ----
+const ver = v => {
+  $("v-hoy").classList.toggle("hide", v !== "hoy");
+  $("v-rep").classList.toggle("hide", v !== "rep");
+  $("t-hoy").classList.toggle("on", v === "hoy");
+  $("t-rep").classList.toggle("on", v === "rep");
+  $("msg").textContent = "";
+  if (v === "hoy") pintarHoy().catch(er => err("msg", er));
+  else pintarRep().catch(er => err("msg", er));
+};
+$("t-hoy").onclick = () => ver("hoy");
+$("t-rep").onclick = () => ver("rep");
+$("quin").onchange = () => pintarRep().catch(er => err("msg", er));
+
+// ---- Datos ----
+async function traer(a, b) {
+  const s = await getDocs(query(collection(db, "marcaciones"), where("hora", ">=", Timestamp.fromMillis(a)), where("hora", "<", Timestamp.fromMillis(b))));
+  return s.docs.map(d => d.data()).filter(m => m.hora).map(m => ({ ced: m.cedula, tipo: m.tipo, ms: m.hora.toMillis() }));
+}
+
+async function pintarHoy() {
+  $("b-hoy").innerHTML = '<tr><td colspan="5">Cargando…</td></tr>';
+  const t = loc(Date.now()), y = t.getUTCFullYear(), mo = t.getUTCMonth(), d = t.getUTCDate();
+  const ms = await traer(Date.UTC(y, mo, d, 6), Date.UTC(y, mo, d + 1, 6));
+  const por = {};
+  ms.forEach(m => { (por[m.ced] = por[m.ced] || {})[m.tipo] = m.ms; });
+  let tr = 0, ok = 0, sin = 0, h = "";
+  colabs.filter(c => c.activo === true).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre))).forEach(c => {
+    const x = por[c.id] || {};
+    let est = "Sin marcar", cl = "gris";
+    if (x.entrada && x.salida) { est = "Completo"; cl = "ok"; ok++; }
+    else if (x.entrada) { est = "Trabajando"; cl = "azul"; tr++; }
+    else sin++;
+    h += "<tr><td>" + esc(c.nombre) + "</td><td>" + esc(c.id.toUpperCase()) + "</td><td>" + (x.entrada ? hm(loc(x.entrada)) : "—") +
+         "</td><td>" + (x.salida ? hm(loc(x.salida)) : "—") + '</td><td><span class="tag ' + cl + '">' + est + "</span></td></tr>";
+  });
+  $("b-hoy").innerHTML = h || '<tr><td colspan="5">No hay colaboradores activos.</td></tr>';
+  $("c-tr").textContent = tr; $("c-ok").textContent = ok; $("c-sin").textContent = sin;
+}
+
+function llenarQuincenas() {
+  const t = loc(Date.now());
+  let y = t.getUTCFullYear(), mo = t.getUTCMonth(), q = t.getUTCDate() <= 15 ? 1 : 2, o = "";
+  for (let i = 0; i < 8; i++) {
+    const ini = q === 1 ? 1 : 16, fin = q === 1 ? 15 : new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+    o += '<option value="' + y + "-" + mo + "-" + q + '">' + ini + " – " + fin + " " + meses[mo] + " " + y + "</option>";
+    if (q === 2) q = 1; else { q = 2; mo--; if (mo < 0) { mo = 11; y--; } }
+  }
+  $("quin").innerHTML = o;
+}
+
+async function pintarRep() {
+  $("b-rep").innerHTML = '<tr><td colspan="9">Cargando…</td></tr>';
+  const p = $("quin").value.split("-").map(Number), y = p[0], mo = p[1], q = p[2];
+  const ini = q === 1 ? 1 : 16, fin = q === 1 ? 15 : new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+  const ms = await traer(Date.UTC(y, mo, ini, 6), Date.UTC(y, mo, fin + 1, 6));
+  const por = {};
+  ms.forEach(m => { const k = m.ced + "|" + dkey(loc(m.ms)); (por[k] = por[k] || { ced: m.ced, f: loc(m.ms) })[m.tipo] = m.ms; });
+  const nom = {}; colabs.forEach(c => { nom[c.id] = c.nombre; });
+  const ceds = [...new Set(Object.values(por).map(x => x.ced))].sort((a, b) => String(nom[a] || a).localeCompare(String(nom[b] || b)));
+  const aE = hhmm(lugar.horaEntrada || "08:00"), aS = hhmm(lugar.horaSalida || "17:00"), alm = lugar.almuerzoMin || 60;
+  filas = [];
+  ceds.forEach(c => {
+    let tH = 0, tT = 0, tX = 0;
+    Object.values(por).filter(x => x.ced === c).sort((a, b) => (a.entrada || a.salida) - (b.entrada || b.salida)).forEach(x => {
+      const f = x.f, esFin = f.getUTCDay() === 0 || f.getUTCDay() === 6;
+      let h = null, t = 0, xx = 0, est = esFin ? "Fin de semana" : "Completo";
+      if (x.entrada && x.salida) {
+        h = Math.max(0, (x.salida - x.entrada) / 6e4 - alm);
+        const e = mins(x.entrada), s = mins(x.salida);
+        if (esFin) xx = h; else { t = Math.max(0, e - aE); xx = Math.max(0, aE - e) + Math.max(0, s - aS); }
+        tH += h; tT += t; tX += xx;
+      } else est = x.entrada ? "Falta salida" : "Falta entrada";
+      filas.push({ n: nom[c] || c, ced: c.toUpperCase(), fecha: dias[f.getUTCDay()] + " " + f.getUTCDate() + " " + meses[f.getUTCMonth()],
+        e: x.entrada ? hm(loc(x.entrada)) : "—", s: x.salida ? hm(loc(x.salida)) : "—", h: h, t: t, x: xx, est: est, sub: false });
+    });
+    filas.push({ n: "Total " + (nom[c] || c), h: tH, t: tT, x: tX, sub: true });
+  });
+  $("b-rep").innerHTML = filas.map(f => f.sub
+    ? '<tr class="sub"><td colspan="5">' + esc(f.n) + "</td><td>" + fmt(f.h) + "</td><td>" + fmtMin(f.t) + "</td><td>" + fmtMin(f.x) + "</td><td></td></tr>"
+    : "<tr><td>" + esc(f.n) + "</td><td>" + esc(f.ced) + "</td><td>" + f.fecha + "</td><td>" + f.e + "</td><td>" + f.s + "</td><td>" +
+      (f.h == null ? "—" : fmt(f.h)) + "</td><td>" + fmtMin(f.t) + "</td><td>" + fmtMin(f.x) + '</td><td><span class="tag ' +
+      (f.est === "Completo" ? "ok" : f.est === "Fin de semana" ? "azul" : "warn") + '">' + f.est + "</span></td></tr>"
+  ).join("") || '<tr><td colspan="9">No hay marcaciones en esta quincena.</td></tr>';
+}
+
+// ---- Exportar a Excel ----
+$("xls").onclick = () => {
+  const r = [["Nombre completo", "Cédula", "Fecha", "Entrada", "Salida", "Total horas", "Tardanza (min)", "Tiempo extra (min)", "Estado"]];
+  filas.forEach(f => r.push(f.sub
+    ? [f.n, "", "", "", "", +(f.h / 60).toFixed(2), Math.round(f.t), Math.round(f.x), ""]
+    : [f.n, f.ced, f.fecha, f.e, f.s, f.h == null ? "" : +(f.h / 60).toFixed(2), Math.round(f.t), Math.round(f.x), f.est]));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(r), "Planilla");
+  XLSX.writeFile(wb, "Planilla_" + $("quin").selectedOptions[0].textContent.replace(/[^\w]+/g, "_") + ".xlsx");
+};
+</script>
+</body>
+</html>
