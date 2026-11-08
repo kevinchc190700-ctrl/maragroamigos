@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MarAgroAmigos</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F6F7F2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1B2A1E}
+.wrap{max-width:430px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 20px 28px;display:flex;flex-direction:column;gap:16px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.card{background:#fff;border-radius:20px;padding:20px}
+.muted{color:#4F5F52;font-size:13px}
+h1{font-size:20px;margin:0}
+label{font-size:14px;font-weight:600;display:block;margin-top:14px}
+input[type=text],input[type=password]{width:100%;height:50px;border:1px solid #C9D2C4;border-radius:12px;padding:0 14px;font-size:16px;margin-top:6px}
+.chk{display:flex;align-items:center;gap:8px;font-weight:400;margin:14px 0}
+.btn{width:100%;height:64px;border:0;border-radius:16px;background:#2F6B3A;color:#fff;font-size:20px;font-weight:700;cursor:pointer}
+.btn:disabled{background:#8FA894;cursor:default}
+.link{background:none;border:0;color:#2F6B3A;font-size:14px;font-weight:600;cursor:pointer;padding:8px}
+.msg{font-size:14px;font-weight:600;min-height:20px;text-align:center;margin-top:10px}
+.ok{color:#2F6B3A}.err{color:#B3261E}
+.row{display:flex;align-items:center;gap:8px;height:34px}
+.trk{position:relative;flex:1;height:14px;background:#E6EADF;border-radius:7px;overflow:hidden}
+.bar{position:absolute;top:0;height:14px;background:#2F6B3A}
+.lun{position:absolute;top:0;height:14px;background:#fff}
+.d{width:48px;font-size:13px;color:#4F5F52}
+.t{min-width:58px;text-align:right;font-size:13px;font-weight:600;white-space:nowrap}
+.axis{position:relative;height:16px;margin:2px 66px 0 56px;font-size:12px;color:#4F5F52}
+.axis i{position:absolute;font-style:normal}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<img src="agroamigos-logo.png" alt="AgroAmigos" style="height:60px;width:auto;align-self:center">
+
+<section id="login" class="card">
+<h1>Iniciar sesión</h1>
+<form id="form">
+<label for="ced">Número de cédula</label>
+<input type="text" id="ced" autocomplete="username" autocapitalize="none" autocorrect="off" required>
+<label for="pass">Contraseña</label>
+<input type="password" id="pass" autocomplete="current-password" required>
+<label class="chk"><input type="checkbox" id="recordar"> Recordar mi cédula</label>
+<button class="btn" type="submit">Entrar</button>
+<div class="msg" id="lmsg"></div>
+</form>
+</section>
+
+<div id="app" class="stack hide">
+<div class="card" style="display:flex;justify-content:space-between;align-items:center">
+<div><div class="muted">Hola,</div><h1 id="nombre"></h1></div>
+<button class="link" id="salir">Salir</button>
+</div>
+<div class="card" style="text-align:center">
+<div class="muted" id="fecha"></div>
+<button class="btn" id="marcar" style="margin-top:12px" disabled>Cargando…</button>
+<div class="msg" id="msg"></div>
+</div>
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><b>Mi quincena</b><span class="muted" id="qtxt"></span></div>
+<div class="muted" style="margin:4px 0 8px">Entrada y salida por día</div>
+<div id="grafica"></div>
+<div class="axis"><i style="left:0">7:00</i><i style="left:45.5%;transform:translateX(-50%)">12:00</i><i style="right:0">18:00</i></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid #E6EADF">
+<span class="muted" style="font-size:14px">Total acumulado</span>
+<b id="total" style="font-size:20px;color:#2F6B3A">0 h 00</b>
+</div>
+<div class="muted" style="margin-top:10px;text-align:center">El tramo blanco de cada barra es la hora de almuerzo, descontada automáticamente.</div>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCISZZdYvOd4npRtDFqGHdo4ikDft5H17g",
+  authDomain: "maragroamigos.firebaseapp.com",
+  projectId: "maragroamigos",
+  storageBucket: "maragroamigos.firebasestorage.app",
+  messagingSenderId: "123263602492",
+  appId: "1:123263602492:web:0870844028f4d52e22d839"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+const DOMINIO = "@maragroamigos.app";
+const $ = id => document.getElementById(id);
+const norm = s => s.trim().toLowerCase().replace(/[\s-]/g, "");
+let ced = "", lugar = null, marcas = [];
+
+// Hora de Nicaragua (UTC-6): reloj desplazado, se lee con getUTC*
+const loc = ms => new Date(ms - 6 * 36e5);
+const dkey = d => d.getUTCFullYear() + "-" + (d.getUTCMonth() + 1) + "-" + d.getUTCDate();
+const hm = d => d.getUTCHours() + ":" + String(d.getUTCMinutes()).padStart(2, "0");
+const dec = d => d.getUTCHours() + d.getUTCMinutes() / 60;
+const fmt = min => { const m = Math.round(min); return Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0"); };
+const setMsg = (t, c) => { $("msg").textContent = t; $("msg").className = "msg " + (c || ""); };
+const metros = (a, b, c, d) => {
+  const r = x => x * Math.PI / 180, R = 6371000, dl = r(c - a), dn = r(d - b);
+  const h = Math.sin(dl / 2) ** 2 + Math.cos(r(a)) * Math.cos(r(c)) * Math.sin(dn / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+};
+
+// ---- Inicio de sesión ----
+$("ced").value = localStorage.getItem("ced") || "";
+$("recordar").checked = !!localStorage.getItem("ced");
+
+$("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  $("lmsg").textContent = "Entrando…";
+  $("lmsg").className = "msg";
+  try {
+    await signInWithEmailAndPassword(auth, norm($("ced").value) + DOMINIO, $("pass").value);
+    if ($("recordar").checked) localStorage.setItem("ced", $("ced").value.trim());
+    else localStorage.removeItem("ced");
+    $("pass").value = "";
+  } catch (er) {
+    const malos = ["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found", "auth/invalid-email"];
+    $("lmsg").textContent = malos.includes(er.code) ? "Cédula o contraseña incorrecta." : "No se pudo entrar. Revisa tu conexión.";
+    $("lmsg").className = "msg err";
+  }
+});
+$("salir").onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async u => {
+  $("login").classList.toggle("hide", !!u);
+  $("app").classList.toggle("hide", !u);
+  if (!u) return;
+  $("lmsg").textContent = "";
+  ced = u.email.split("@")[0];
+  try {
+    const [c, l] = await Promise.all([getDoc(doc(db, "colaboradores", ced)), getDoc(doc(db, "config", "lugar"))]);
+    if (!c.exists() || c.data().activo !== true || !l.exists()) {
+      $("nombre").textContent = "Sin acceso";
+      $("marcar").textContent = "No disponible";
+      setMsg("Tu usuario no está habilitado. Habla con el administrador.", "err");
+      return;
+    }
+    $("nombre").textContent = c.data().nombre;
+    lugar = l.data();
+    await cargar();
+  } catch (er) {
+    setMsg("No se pudieron cargar tus datos. Revisa tu conexión.", "err");
+  }
+});
+
+// ---- Datos y gráfica ----
+async function cargar() {
+  const snap = await getDocs(query(collection(db, "marcaciones"), where("cedula", "==", ced)));
+  marcas = snap.docs.map(d => d.data()).filter(m => m.hora).map(m => ({ tipo: m.tipo, ms: m.hora.toMillis() }));
+  pintar();
+}
+
+function pintar() {
+  const ahora = loc(Date.now());
+  $("fecha").textContent = ahora.toLocaleDateString("es-NI", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+
+  const dias = {};
+  marcas.forEach(m => { const k = dkey(loc(m.ms)); (dias[k] = dias[k] || {})[m.tipo] = m.ms; });
+
+  const h = dias[dkey(ahora)] || {}, b = $("marcar");
+  if (!h.entrada) { b.textContent = "Marcar entrada"; b.dataset.t = "entrada"; b.disabled = false; }
+  else if (!h.salida) { b.textContent = "Marcar salida"; b.dataset.t = "salida"; b.disabled = false; }
+  else { b.textContent = "Jornada marcada"; b.dataset.t = ""; b.disabled = true; }
+
+  const y = ahora.getUTCFullYear(), mo = ahora.getUTCMonth(), hoy = ahora.getUTCDate();
+  const ini = hoy <= 15 ? 1 : 16;
+  const fin = hoy <= 15 ? 15 : new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+  const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  $("qtxt").textContent = ini + " – " + fin + " " + meses[mo];
+
+  const p = v => Math.min(100, Math.max(0, (v - 7) / 11 * 100));
+  let html = "", total = 0;
+  for (let d = ini; d <= fin; d++) {
+    const x = dias[y + "-" + (mo + 1) + "-" + d];
+    if (!x) continue;
+    const nom = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"][new Date(Date.UTC(y, mo, d)).getUTCDay()] + " " + d;
+    let barra = "", tot = "Falta salida";
+    if (x.entrada && x.salida) {
+      const a = p(dec(loc(x.entrada))), s = p(dec(loc(x.salida)));
+      barra = '<div class="bar" style="left:' + a + '%;width:' + (s - a) + '%"></div>' +
+              '<div class="lun" style="left:' + p(12) + '%;width:' + (p(13) - p(12)) + '%"></div>';
+      const min = Math.max(0, (x.salida - x.entrada) / 6e4 - (lugar.almuerzoMin || 60));
+      total += min;
+      tot = fmt(min);
+    }
+    html += '<div class="row"><span class="d">' + nom + '</span><div class="trk">' + barra + '</div><span class="t">' + tot + '</span></div>';
+  }
+  $("grafica").innerHTML = html || '<div class="muted">Aún no hay marcaciones en esta quincena.</div>';
+  $("total").textContent = fmt(total);
+}
+
+// ---- Marcar con geocerca ----
+$("marcar").onclick = () => {
+  const tipo = $("marcar").dataset.t;
+  if (!tipo) return;
+  const b = $("marcar");
+  const fin = (t, c) => { setMsg(t, c); b.disabled = false; };
+  b.disabled = true;
+  setMsg("Obteniendo tu ubicación…", "");
+  if (!navigator.geolocation) return fin("Tu dispositivo no permite usar la ubicación.", "err");
+
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const la = pos.coords.latitude, lo = pos.coords.longitude, pr = pos.coords.accuracy;
+    const dist = metros(la, lo, lugar.lat, lugar.lng);
+    if (pr > lugar.precisionMax) return fin("Ubicación poco precisa (" + Math.round(pr) + " m). Sal a un lugar abierto e intenta de nuevo.", "err");
+    if (dist > lugar.radio) return fin("Estás fuera del área de trabajo (a " + Math.round(dist) + " m del punto).", "err");
+    try {
+      const id = ced + "_" + dkey(loc(Date.now())) + "_" + tipo;
+      await setDoc(doc(db, "marcaciones", id), {
+        cedula: ced, tipo: tipo, hora: serverTimestamp(),
+        lat: la, lng: lo, precision: Math.round(pr), distancia: Math.round(dist), origen: "app"
+      });
+      await cargar();
+      setMsg((tipo === "entrada" ? "Entrada" : "Salida") + " registrada a las " + hm(loc(Date.now())), "ok");
+    } catch (er) {
+      fin("No se pudo registrar. Revisa la hora de tu teléfono y tu conexión.", "err");
+    }
+  }, er => fin(er.code === 1 ? "Debes permitir el acceso a la ubicación." : "No se pudo obtener la ubicación.", "err"),
+  { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+};
+</script>
+</body>
+</html>
