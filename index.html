@@ -144,7 +144,7 @@ onAuthStateChanged(auth, async u => {
     lugar = l.data();
     await cargar();
   } catch (er) {
-    setMsg("No se pudieron cargar tus datos. Revisa tu conexión.", "err");
+    setMsg("No se pudieron cargar tus datos (" + (er.code || er.message) + ").", "err");
   }
 });
 
