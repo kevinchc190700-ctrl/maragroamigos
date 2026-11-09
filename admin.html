@@ -34,6 +34,11 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 .hide{display:none!important}
 .bar2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .bar2 select{margin:0}
+.good{color:#2F6B3A;font-weight:600;font-size:14px;margin-top:10px}
+.form{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.form label{margin:0}
+.form input,.form select{margin-top:4px;max-width:220px;height:42px}
+.mini{height:30px;padding:0 10px;border:1px solid #2F6B3A;border-radius:8px;background:#fff;color:#2F6B3A;font-size:12px;font-weight:600;cursor:pointer;margin-left:6px}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -60,6 +65,7 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 <div class="tabs">
 <button class="btn on" id="t-hoy">Hoy</button>
 <button class="btn" id="t-rep">Reporte quincenal</button>
+<button class="btn" id="t-per">Permisos y feriados</button>
 </div>
 <div class="err" id="msg"></div>
 
@@ -82,6 +88,47 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 <div class="card scroll">
 <table><thead><tr><th>Nombre completo</th><th>Cédula</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Total horas</th><th>Tardanza</th><th>Tiempo extra</th><th>Estado</th></tr></thead><tbody id="b-rep"></tbody></table>
 </div>
+<div class="card" id="corr">
+<b>Agregar, corregir o borrar una marcación</b>
+<div class="form" style="margin-top:10px">
+<div><label for="m-col">Colaborador</label><select id="m-col"></select></div>
+<div><label for="m-fec">Fecha</label><input type="date" id="m-fec"></div>
+<div><label for="m-tip">Tipo</label><select id="m-tip"><option value="entrada">Entrada</option><option value="salida">Salida</option></select></div>
+<div><label for="m-hor">Hora</label><input type="time" id="m-hor"></div>
+<div><label for="m-not">Motivo (obligatorio)</label><input type="text" id="m-not" placeholder="Ej.: olvidó marcar salida"></div>
+<button class="btn" id="m-guardar">Guardar</button>
+<button class="btn sec" id="m-borrar">Borrar</button>
+</div>
+</div>
+</section>
+
+<section id="v-per" class="hide">
+<div class="card">
+<b>Registrar permiso</b>
+<div class="form" style="margin-top:10px">
+<div><label for="p-col">Colaborador</label><select id="p-col"></select></div>
+<div><label for="p-fec">Fecha</label><input type="date" id="p-fec"></div>
+<div><label for="p-mot">Motivo</label><select id="p-mot"><option>Problema familiar</option><option>Accidente laboral</option><option>Otro</option></select></div>
+<div><label for="p-not">Nota</label><input type="text" id="p-not"></div>
+<button class="btn" id="p-guardar">Guardar permiso</button>
+</div>
+</div>
+<div class="card scroll">
+<b>Permisos registrados</b>
+<table><thead><tr><th>Nombre completo</th><th>Fecha</th><th>Motivo</th><th>Nota</th><th></th></tr></thead><tbody id="b-per"></tbody></table>
+</div>
+<div class="card">
+<b>Registrar feriado</b>
+<div class="form" style="margin-top:10px">
+<div><label for="f-fec">Fecha</label><input type="date" id="f-fec"></div>
+<div><label for="f-nom">Nombre</label><input type="text" id="f-nom" placeholder="Ej.: Día de la Virgen"></div>
+<button class="btn" id="f-guardar">Guardar feriado</button>
+</div>
+</div>
+<div class="card scroll">
+<b>Feriados registrados</b>
+<table><thead><tr><th>Fecha</th><th>Nombre</th><th></th></tr></thead><tbody id="b-fer"></tbody></table>
+</div>
 </section>
 </div>
 </div>
@@ -89,7 +136,7 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyCISZZdYvOd4npRtDFqGHdo4ikDft5H17g",
@@ -117,7 +164,13 @@ const mins = ms => { const d = loc(ms); return d.getUTCHours() * 60 + d.getUTCMi
 const hhmm = s => { const p = s.split(":"); return +p[0] * 60 + +p[1]; };
 const fmt = min => { const m = Math.round(min); return Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0"); };
 const fmtMin = m => m ? Math.round(m) + " min" : "—";
-const err = (el, er) => { $(el).textContent = "Error: " + (er.code || er.message); };
+const err = (el, er) => { $(el).textContent = "Error: " + (er.code || er.message); $(el).className = "err"; };
+const aviso = t => { $("msg").textContent = t; $("msg").className = "good"; };
+const malo = t => { $("msg").textContent = t; $("msg").className = "err"; };
+const yo = () => auth.currentUser.email.split("@")[0];
+const iso = (y, m, d) => y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+const lleno = (id, lista) => { $(id).innerHTML = lista.map(c => '<option value="' + esc(c.id) + '">' + esc(c.nombre) + "</option>").join(""); };
+let permisos = [], feriados = [];
 
 // ---- Inicio de sesión ----
 $("ced").value = localStorage.getItem("ced") || "";
@@ -163,14 +216,18 @@ onAuthStateChanged(auth, async u => {
 const ver = v => {
   $("v-hoy").classList.toggle("hide", v !== "hoy");
   $("v-rep").classList.toggle("hide", v !== "rep");
+  $("v-per").classList.toggle("hide", v !== "per");
   $("t-hoy").classList.toggle("on", v === "hoy");
   $("t-rep").classList.toggle("on", v === "rep");
+  $("t-per").classList.toggle("on", v === "per");
   $("msg").textContent = "";
   if (v === "hoy") pintarHoy().catch(er => err("msg", er));
-  else pintarRep().catch(er => err("msg", er));
+  else if (v === "rep") cargarExtra().then(pintarRep).catch(er => err("msg", er));
+  else cargarExtra().then(pintarPer).catch(er => err("msg", er));
 };
 $("t-hoy").onclick = () => ver("hoy");
 $("t-rep").onclick = () => ver("rep");
+$("t-per").onclick = () => ver("per");
 $("quin").onchange = () => pintarRep().catch(er => err("msg", er));
 
 // ---- Datos ----
@@ -210,40 +267,133 @@ function llenarQuincenas() {
   $("quin").innerHTML = o;
 }
 
+async function cargarExtra() {
+  const r = await Promise.all([getDocs(collection(db, "permisos")), getDocs(collection(db, "feriados"))]);
+  permisos = r[0].docs.map(d => ({ id: d.id, ...d.data() }));
+  feriados = r[1].docs.map(d => ({ id: d.id, ...d.data() }));
+  const act = colabs.filter(c => c.activo === true).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre)));
+  const v1 = $("m-col").value, v2 = $("p-col").value;
+  lleno("m-col", act); lleno("p-col", act);
+  if (v1) $("m-col").value = v1;
+  if (v2) $("p-col").value = v2;
+}
+
 async function pintarRep() {
   $("b-rep").innerHTML = '<tr><td colspan="9">Cargando…</td></tr>';
   const p = $("quin").value.split("-").map(Number), y = p[0], mo = p[1], q = p[2];
   const ini = q === 1 ? 1 : 16, fin = q === 1 ? 15 : new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+  const hoy = loc(Date.now()), esAhora = hoy.getUTCFullYear() === y && hoy.getUTCMonth() === mo;
   const ms = await traer(Date.UTC(y, mo, ini, 6), Date.UTC(y, mo, fin + 1, 6));
   const por = {};
-  ms.forEach(m => { const k = m.ced + "|" + dkey(loc(m.ms)); (por[k] = por[k] || { ced: m.ced, f: loc(m.ms) })[m.tipo] = m.ms; });
+  ms.forEach(m => { const k = m.ced + "|" + dkey(loc(m.ms)); (por[k] = por[k] || { ced: m.ced })[m.tipo] = m.ms; });
   const nom = {}; colabs.forEach(c => { nom[c.id] = c.nombre; });
-  const ceds = [...new Set(Object.values(por).map(x => x.ced))].sort((a, b) => String(nom[a] || a).localeCompare(String(nom[b] || b)));
+  const perm = {}; permisos.forEach(x => { perm[x.cedula + "|" + x.fecha] = x; });
+  const fer = {}; feriados.forEach(x => { fer[x.id] = true; });
+  const ceds = [...new Set([...Object.values(por).map(x => x.ced), ...colabs.filter(c => c.activo === true).map(c => c.id)])]
+    .sort((a, b) => String(nom[a] || a).localeCompare(String(nom[b] || b)));
   const aE = hhmm(lugar.horaEntrada || "08:00"), aS = hhmm(lugar.horaSalida || "17:00"), alm = lugar.almuerzoMin || 60;
   filas = [];
   ceds.forEach(c => {
     let tH = 0, tT = 0, tX = 0;
-    Object.values(por).filter(x => x.ced === c).sort((a, b) => (a.entrada || a.salida) - (b.entrada || b.salida)).forEach(x => {
-      const f = x.f, esFin = f.getUTCDay() === 0 || f.getUTCDay() === 6;
-      let h = null, t = 0, xx = 0, est = esFin ? "Fin de semana" : "Completo";
-      if (x.entrada && x.salida) {
-        h = Math.max(0, (x.salida - x.entrada) / 6e4 - (esFin ? 0 : alm));
-        const e = mins(x.entrada), s = mins(x.salida);
-        if (esFin) xx = h; else { t = Math.max(0, e - aE); xx = Math.max(0, aE - e) + Math.max(0, s - aS); }
-        tH += h; tT += t; tX += xx;
-      } else est = x.entrada ? "Falta salida" : "Falta entrada";
-      filas.push({ n: nom[c] || c, ced: c.toUpperCase(), fecha: dias[f.getUTCDay()] + " " + f.getUTCDate() + " " + meses[f.getUTCMonth()],
-        e: x.entrada ? hm(loc(x.entrada)) : "—", s: x.salida ? hm(loc(x.salida)) : "—", h: h, t: t, x: xx, est: est, sub: false });
-    });
+    for (let d = ini; d <= fin; d++) {
+      const sem = new Date(Date.UTC(y, mo, d)).getUTCDay(), esFin = sem === 0 || sem === 6;
+      const x = por[c + "|" + y + "-" + (mo + 1) + "-" + d], pr = perm[c + "|" + iso(y, mo, d)];
+      const base = { cid: c, n: nom[c] || c, ced: c.toUpperCase(), fecha: dias[sem] + " " + d + " " + meses[mo], e: "—", s: "—", h: null, t: 0, x: 0, sub: false, falta: "", dk: y + "-" + (mo + 1) + "-" + d };
+      if (x) {
+        let h = null, t = 0, xx = 0, est = esFin ? "Fin de semana" : "Completo", falta = "";
+        if (x.entrada && x.salida) {
+          h = Math.max(0, (x.salida - x.entrada) / 6e4 - (esFin ? 0 : alm));
+          const e = mins(x.entrada), s = mins(x.salida);
+          if (esFin) xx = h; else { t = Math.max(0, e - aE); xx = Math.max(0, aE - e) + Math.max(0, s - aS); }
+          tH += h; tT += t; tX += xx;
+        } else { falta = x.entrada ? "salida" : "entrada"; est = "Falta " + falta; }
+        filas.push({ ...base, e: x.entrada ? hm(loc(x.entrada)) : "—", s: x.salida ? hm(loc(x.salida)) : "—", h: h, t: t, x: xx, est: est, falta: falta });
+      } else if (pr) {
+        filas.push({ ...base, est: "Permiso · " + pr.motivo });
+      } else if (!esFin && !fer[iso(y, mo, d)] && (!esAhora || d < hoy.getUTCDate())) {
+        filas.push({ ...base, est: "Ausencia" });
+      }
+    }
     filas.push({ n: "Total " + (nom[c] || c), h: tH, t: tT, x: tX, sub: true });
   });
   $("b-rep").innerHTML = filas.map(f => f.sub
     ? '<tr class="sub"><td colspan="5">' + esc(f.n) + "</td><td>" + fmt(f.h) + "</td><td>" + fmtMin(f.t) + "</td><td>" + fmtMin(f.x) + "</td><td></td></tr>"
     : "<tr><td>" + esc(f.n) + "</td><td>" + esc(f.ced) + "</td><td>" + f.fecha + "</td><td>" + f.e + "</td><td>" + f.s + "</td><td>" +
       (f.h == null ? "—" : fmt(f.h)) + "</td><td>" + fmtMin(f.t) + "</td><td>" + fmtMin(f.x) + '</td><td><span class="tag ' +
-      (f.est === "Completo" ? "ok" : f.est === "Fin de semana" ? "azul" : "warn") + '">' + f.est + "</span></td></tr>"
-  ).join("") || '<tr><td colspan="9">No hay marcaciones en esta quincena.</td></tr>';
+      (f.est === "Completo" ? "ok" : (f.est === "Fin de semana" || f.est.indexOf("Permiso") === 0) ? "azul" : "warn") + '">' + esc(f.est) + "</span>" +
+      (f.falta ? '<button class="mini" data-c="' + esc(f.cid) + '" data-d="' + f.dk + '" data-t="' + f.falta + '">Corregir</button>' : "") + "</td></tr>"
+  ).join("") || '<tr><td colspan="9">No hay datos en esta quincena.</td></tr>';
 }
+
+$("b-rep").onclick = e => {
+  const b = e.target.closest("button[data-c]");
+  if (!b) return;
+  const p = b.dataset.d.split("-").map(Number);
+  $("m-col").value = b.dataset.c;
+  $("m-fec").value = iso(p[0], p[1] - 1, p[2]);
+  $("m-tip").value = b.dataset.t;
+  $("m-hor").value = "";
+  $("m-not").focus();
+  $("corr").scrollIntoView({ behavior: "smooth" });
+};
+
+const idMarca = () => {
+  const c = $("m-col").value, f = $("m-fec").value.split("-").map(Number), t = $("m-tip").value;
+  return { c: c, f: f, t: t, id: c + "_" + f[0] + "-" + f[1] + "-" + f[2] + "_" + t };
+};
+$("m-guardar").onclick = async () => {
+  const m = idMarca(), h = $("m-hor").value, nota = $("m-not").value.trim();
+  if (!m.c || !m.f[0] || !h) return malo("Elige colaborador, fecha y hora.");
+  if (nota.length < 3) return malo("Escribe el motivo de la corrección.");
+  const hp = h.split(":").map(Number);
+  try {
+    const ref = doc(db, "marcaciones", m.id), ant = await getDoc(ref);
+    const dato = { cedula: m.c, tipo: m.t, hora: Timestamp.fromMillis(Date.UTC(m.f[0], m.f[1] - 1, m.f[2], hp[0] + 6, hp[1])), origen: "admin", nota: nota, corregidoPor: yo() };
+    if (ant.exists() && ant.data().hora) dato.horaAnterior = ant.data().hora;
+    await setDoc(ref, dato);
+    $("m-not").value = "";
+    await pintarRep();
+    aviso("Marcación guardada.");
+  } catch (er) { err("msg", er); }
+};
+$("m-borrar").onclick = async () => {
+  const m = idMarca();
+  if (!m.c || !m.f[0]) return malo("Elige colaborador, fecha y tipo.");
+  if (!confirm("¿Borrar esta marcación?")) return;
+  try { await deleteDoc(doc(db, "marcaciones", m.id)); await pintarRep(); aviso("Marcación borrada."); } catch (er) { err("msg", er); }
+};
+
+function pintarPer() {
+  const nom = {}; colabs.forEach(c => { nom[c.id] = c.nombre; });
+  $("b-per").innerHTML = permisos.slice().sort((a, b) => String(b.fecha).localeCompare(String(a.fecha))).slice(0, 40).map(x =>
+    "<tr><td>" + esc(nom[x.cedula] || x.cedula) + "</td><td>" + esc(x.fecha) + "</td><td>" + esc(x.motivo) + "</td><td>" + esc(x.nota || "") +
+    '</td><td><button class="mini" data-del="permisos/' + esc(x.id) + '">Borrar</button></td></tr>').join("") || '<tr><td colspan="5">Sin permisos registrados.</td></tr>';
+  $("b-fer").innerHTML = feriados.slice().sort((a, b) => b.id.localeCompare(a.id)).map(x =>
+    "<tr><td>" + esc(x.id) + "</td><td>" + esc(x.nombre) + '</td><td><button class="mini" data-del="feriados/' + esc(x.id) + '">Borrar</button></td></tr>').join("") || '<tr><td colspan="3">Sin feriados registrados.</td></tr>';
+}
+$("v-per").onclick = async e => {
+  const b = e.target.closest("button[data-del]");
+  if (!b || !confirm("¿Borrar este registro?")) return;
+  try { await deleteDoc(doc(db, ...b.dataset.del.split("/"))); await cargarExtra(); pintarPer(); aviso("Registro borrado."); } catch (er) { err("msg", er); }
+};
+$("p-guardar").onclick = async () => {
+  const c = $("p-col").value, f = $("p-fec").value;
+  if (!c || !f) return malo("Elige el colaborador y la fecha.");
+  try {
+    await setDoc(doc(db, "permisos", c + "_" + f), { cedula: c, fecha: f, motivo: $("p-mot").value, nota: $("p-not").value.trim(), creadoPor: yo() });
+    $("p-not").value = "";
+    await cargarExtra(); pintarPer(); aviso("Permiso guardado.");
+  } catch (er) { err("msg", er); }
+};
+$("f-guardar").onclick = async () => {
+  const f = $("f-fec").value, n = $("f-nom").value.trim();
+  if (!f || !n) return malo("Escribe la fecha y el nombre del feriado.");
+  try {
+    await setDoc(doc(db, "feriados", f), { nombre: n, creadoPor: yo() });
+    $("f-nom").value = "";
+    await cargarExtra(); pintarPer(); aviso("Feriado guardado.");
+  } catch (er) { err("msg", er); }
+};
 
 // ---- Exportar a Excel ----
 $("xls").onclick = () => {
