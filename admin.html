@@ -32,6 +32,25 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 .ok{background:#DDEFE0;color:#1F5129}.warn{background:#FBE7CC;color:#7A3F08}.gris{background:#ECEFE8;color:#3D4A40}.azul{background:#E3E8F5;color:#27407A}
 .err{color:#B3261E;font-weight:600;font-size:14px;margin-top:10px}
 .hide{display:none!important}
+body.sinsesion{background:linear-gradient(160deg,#226782,#17495C) fixed}
+body.sinsesion header{display:none}
+.login{position:fixed;inset:0;overflow:auto;display:flex;flex-direction:column;align-items:center;padding:24px;z-index:10}
+.login .card{width:100%;max-width:400px;margin:auto 0 0;border-radius:28px;padding:28px 24px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.login h1{text-align:center;margin:10px 0 0;font-size:22px}
+.pie{margin:20px 0 auto;font-size:12px;color:#fff;text-align:center}
+#splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#F6F7F2;z-index:50}
+#splash img{height:84px;width:auto;animation:late 1.4s ease-in-out infinite}
+@keyframes late{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.06);opacity:.7}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sp{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-4px;margin-right:8px}
+.btn.cargando{background:#3F8A62;cursor:default}
+.toast{position:fixed;top:14px;left:16px;right:16px;max-width:420px;margin:0 auto;z-index:100;display:flex;gap:14px;align-items:center;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 8px 22px rgba(23,48,42,.18);border-left:6px solid #1FA463;animation:baja .45s ease-out both}
+.toast.mal{border-left-color:#C62828}
+.toast .i{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex:none;background:#1FA463;color:#fff}
+.toast.mal .i{background:#C62828}
+.toast b{display:block;font-size:15px}
+.toast em{display:block;font-style:normal;font-size:13px;color:#4F5F52;margin-top:2px}
+@keyframes baja{from{transform:translateY(-16px);opacity:0}to{transform:translateY(0);opacity:1}}
 .bar2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .bar2 select{margin:0}
 .good{color:#2F6B3A;font-weight:600;font-size:14px;margin-top:10px}
@@ -42,7 +61,8 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body>
+<body class="sinsesion">
+<div id="splash"><img src="agroamigos-logo.png" alt="AgroAmigos"></div>
 <div class="wrap">
 <header>
 <img src="agroamigos-logo.png" alt="AgroAmigos">
@@ -50,15 +70,19 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 <button class="btn sec hide" id="salir">Salir</button>
 </header>
 
-<section id="login" class="card" style="max-width:420px">
+<section id="login" class="login hide">
+<div class="card">
+<div style="text-align:center"><img src="agroamigos-logo.png" alt="AgroAmigos" style="height:84px;width:auto"></div>
+<h1>Panel del administrador</h1>
 <form id="form">
 <label for="ced">Número de cédula</label>
-<input type="text" id="ced" autocomplete="username" autocapitalize="none" autocorrect="off" required>
+<input type="text" id="ced" autocomplete="username" autocapitalize="none" autocorrect="off" required style="max-width:none">
 <label for="pass">Contraseña</label>
-<input type="password" id="pass" autocomplete="current-password" required>
-<div style="margin-top:16px"><button class="btn" type="submit">Entrar</button></div>
-<div class="err" id="lmsg"></div>
+<input type="password" id="pass" autocomplete="current-password" required style="max-width:none">
+<div style="margin-top:18px"><button class="btn" id="entrar" type="submit" style="width:100%;height:50px">Entrar</button></div>
 </form>
+</div>
+<div class="pie">MarAgroAmigos · AgroAmigos</div>
 </section>
 
 <div id="panel" class="hide">
@@ -66,6 +90,7 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 <button class="btn on" id="t-hoy">Hoy</button>
 <button class="btn" id="t-rep">Reporte quincenal</button>
 <button class="btn" id="t-per">Permisos y feriados</button>
+<button class="btn" id="t-sol">Solicitudes</button>
 </div>
 <div class="err" id="msg"></div>
 
@@ -130,6 +155,17 @@ tr.sub td{background:#F1F5EE;font-weight:700}
 <table><thead><tr><th>Fecha</th><th>Nombre</th><th></th></tr></thead><tbody id="b-fer"></tbody></table>
 </div>
 </section>
+
+<section id="v-sol" class="hide">
+<div class="card scroll">
+<b>Solicitudes pendientes</b>
+<table><thead><tr><th>Colaborador</th><th>Fecha</th><th>Tipo</th><th>Hora</th><th>Motivo</th><th>Acción</th></tr></thead><tbody id="b-sol"></tbody></table>
+</div>
+<div class="card scroll">
+<b>Resueltas recientemente</b>
+<table><thead><tr><th>Colaborador</th><th>Fecha</th><th>Tipo</th><th>Hora</th><th>Motivo</th><th>Estado</th></tr></thead><tbody id="b-res"></tbody></table>
+</div>
+</section>
 </div>
 </div>
 
@@ -164,9 +200,32 @@ const mins = ms => { const d = loc(ms); return d.getUTCHours() * 60 + d.getUTCMi
 const hhmm = s => { const p = s.split(":"); return +p[0] * 60 + +p[1]; };
 const fmt = min => { const m = Math.round(min); return Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0"); };
 const fmtMin = m => m ? Math.round(m) + " min" : "—";
-const err = (el, er) => { $(el).textContent = "Error: " + (er.code || er.message); $(el).className = "err"; };
-const aviso = t => { $("msg").textContent = t; $("msg").className = "good"; };
-const malo = t => { $("msg").textContent = t; $("msg").className = "err"; };
+function toast(tipo, titulo, texto) {
+  const viejo = document.querySelector(".toast");
+  if (viejo) viejo.remove();
+  const t = document.createElement("div");
+  t.className = "toast " + tipo;
+  t.setAttribute("role", "status");
+  t.innerHTML = '<div class="i">' + (tipo === "mal" ? "✕" : "✓") + '</div><div><b></b><em></em></div>';
+  t.querySelector("b").textContent = titulo;
+  t.querySelector("em").textContent = texto || "";
+  t.onclick = () => t.remove();
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4500);
+}
+const err = (el, er) => toast("mal", "Ocurrió un error", er.code || er.message);
+const aviso = t => toast("ok", t.replace(/\.$/, ""), "");
+const malo = t => toast("mal", t.replace(/\.$/, ""), "");
+const cargando = (b, on, texto) => {
+  if (on) { b.dataset.txt = b.textContent; b.innerHTML = '<span class="sp"></span>' + texto; }
+  else b.textContent = b.dataset.txt || b.textContent;
+  b.disabled = on;
+  b.classList.toggle("cargando", on);
+};
+const conCarga = (id, texto) => {
+  const b = $(id), h = b.onclick;
+  b.onclick = async e => { cargando(b, true, texto); try { await h(e); } finally { cargando(b, false); } };
+};
 const yo = () => auth.currentUser.email.split("@")[0];
 const iso = (y, m, d) => y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
 const lleno = (id, lista) => { $(id).innerHTML = lista.map(c => '<option value="' + esc(c.id) + '">' + esc(c.nombre) + "</option>").join(""); };
@@ -176,19 +235,22 @@ let permisos = [], feriados = [];
 $("ced").value = localStorage.getItem("ced") || "";
 $("form").addEventListener("submit", async e => {
   e.preventDefault();
-  $("lmsg").textContent = "Entrando…";
+  cargando($("entrar"), true, "Entrando…");
   try {
     await signInWithEmailAndPassword(auth, norm($("ced").value) + DOMINIO, $("pass").value);
     localStorage.setItem("ced", $("ced").value.trim());
     $("pass").value = "";
   } catch (er) {
     const malos = ["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found", "auth/invalid-email"];
-    $("lmsg").textContent = malos.includes(er.code) ? "Cédula o contraseña incorrecta." : "No se pudo entrar. Revisa tu conexión.";
+    toast("mal", malos.includes(er.code) ? "Cédula o contraseña incorrecta" : "No se pudo entrar", malos.includes(er.code) ? "Revisa tus datos e intenta de nuevo." : "Revisa tu conexión a internet.");
   }
+  cargando($("entrar"), false);
 });
 $("salir").onclick = () => signOut(auth);
 
 onAuthStateChanged(auth, async u => {
+  $("splash").classList.add("hide");
+  document.body.classList.toggle("sinsesion", !u);
   $("login").classList.toggle("hide", !!u);
   $("panel").classList.add("hide");
   $("salir").classList.toggle("hide", !u);
@@ -198,18 +260,18 @@ onAuthStateChanged(auth, async u => {
     const a = await getDoc(doc(db, "admins", ced));
     if (!a.exists()) {
       await signOut(auth);
-      $("lmsg").textContent = "Esta cuenta no tiene acceso de administrador.";
+      toast("mal", "Esta cuenta no tiene acceso de administrador", "Usa una cuenta registrada como administrador.");
       return;
     }
-    $("lmsg").textContent = "";
     const [c, l] = await Promise.all([getDocs(collection(db, "colaboradores")), getDoc(doc(db, "config", "lugar"))]);
     colabs = c.docs.map(d => ({ id: d.id, ...d.data() }));
     lugar = l.exists() ? l.data() : {};
+    await cargarExtra();
     llenarQuincenas();
     $("panel").classList.remove("hide");
     $("msg").textContent = "";
     await pintarHoy();
-  } catch (er) { $("lmsg").textContent = "Error: " + (er.code || er.message); }
+  } catch (er) { toast("mal", "No se pudo cargar el panel", er.code || er.message); }
 });
 
 // ---- Pestañas ----
@@ -217,17 +279,20 @@ const ver = v => {
   $("v-hoy").classList.toggle("hide", v !== "hoy");
   $("v-rep").classList.toggle("hide", v !== "rep");
   $("v-per").classList.toggle("hide", v !== "per");
+  $("v-sol").classList.toggle("hide", v !== "sol");
   $("t-hoy").classList.toggle("on", v === "hoy");
   $("t-rep").classList.toggle("on", v === "rep");
   $("t-per").classList.toggle("on", v === "per");
-  $("msg").textContent = "";
+  $("t-sol").classList.toggle("on", v === "sol");
   if (v === "hoy") pintarHoy().catch(er => err("msg", er));
   else if (v === "rep") cargarExtra().then(pintarRep).catch(er => err("msg", er));
-  else cargarExtra().then(pintarPer).catch(er => err("msg", er));
+  else if (v === "per") cargarExtra().then(pintarPer).catch(er => err("msg", er));
+  else cargarExtra().then(pintarSol).catch(er => err("msg", er));
 };
 $("t-hoy").onclick = () => ver("hoy");
 $("t-rep").onclick = () => ver("rep");
 $("t-per").onclick = () => ver("per");
+$("t-sol").onclick = () => ver("sol");
 $("quin").onchange = () => pintarRep().catch(er => err("msg", er));
 
 // ---- Datos ----
@@ -276,6 +341,8 @@ async function cargarExtra() {
   lleno("m-col", act); lleno("p-col", act);
   if (v1) $("m-col").value = v1;
   if (v2) $("p-col").value = v2;
+  const n = permisos.filter(x => x.estado === "pendiente").length;
+  $("t-sol").textContent = "Solicitudes" + (n ? " (" + n + ")" : "");
 }
 
 async function pintarRep() {
@@ -287,7 +354,7 @@ async function pintarRep() {
   const por = {};
   ms.forEach(m => { const k = m.ced + "|" + dkey(loc(m.ms)); (por[k] = por[k] || { ced: m.ced })[m.tipo] = m.ms; });
   const nom = {}; colabs.forEach(c => { nom[c.id] = c.nombre; });
-  const perm = {}; permisos.forEach(x => { perm[x.cedula + "|" + x.fecha] = x; });
+  const perm = {}; permisos.filter(x => x.estado !== "pendiente" && x.estado !== "rechazado").forEach(x => { perm[x.cedula + "|" + x.fecha] = x; });
   const fer = {}; feriados.forEach(x => { fer[x.id] = true; });
   const ceds = [...new Set([...Object.values(por).map(x => x.ced), ...colabs.filter(c => c.activo === true).map(c => c.id)])]
     .sort((a, b) => String(nom[a] || a).localeCompare(String(nom[b] || b)));
@@ -309,7 +376,7 @@ async function pintarRep() {
         } else { falta = x.entrada ? "salida" : "entrada"; est = "Falta " + falta; }
         filas.push({ ...base, e: x.entrada ? hm(loc(x.entrada)) : "—", s: x.salida ? hm(loc(x.salida)) : "—", h: h, t: t, x: xx, est: est, falta: falta });
       } else if (pr) {
-        filas.push({ ...base, est: "Permiso · " + pr.motivo });
+        filas.push({ ...base, est: "Permiso · " + (pr.tipo || pr.motivo) });
       } else if (!esFin && !fer[iso(y, mo, d)] && (!esAhora || d < hoy.getUTCDate())) {
         filas.push({ ...base, est: "Ausencia" });
       }
@@ -395,6 +462,26 @@ $("f-guardar").onclick = async () => {
   } catch (er) { err("msg", er); }
 };
 
+// ---- Solicitudes de permiso ----
+function pintarSol() {
+  const nom = {}; colabs.forEach(c => { nom[c.id] = c.nombre; });
+  const fila = x => "<tr><td>" + esc(nom[x.cedula] || x.cedula) + "</td><td>" + esc(x.fecha) + "</td><td>" + esc(x.tipo || x.motivo || "") + "</td><td>" + esc(x.hora || "—") + "</td><td>" + esc(x.tipo ? x.motivo : (x.nota || "")) + "</td>";
+  const pend = permisos.filter(x => x.estado === "pendiente").sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
+  const res = permisos.filter(x => x.estado === "aprobado" || x.estado === "rechazado").sort((a, b) => String(b.fecha).localeCompare(String(a.fecha))).slice(0, 15);
+  $("b-sol").innerHTML = pend.map(x => fila(x) + '<td><button class="btn" data-id="' + esc(x.id) + '" data-e="aprobado">Aprobar</button><button class="btn sec" style="margin-left:6px" data-id="' + esc(x.id) + '" data-e="rechazado">Rechazar</button></td></tr>').join("") || '<tr><td colspan="6">No hay solicitudes pendientes.</td></tr>';
+  $("b-res").innerHTML = res.map(x => fila(x) + '<td><span class="tag ' + (x.estado === "aprobado" ? "ok" : "warn") + '">' + (x.estado === "aprobado" ? "Aprobado" : "Rechazado") + "</span></td></tr>").join("") || '<tr><td colspan="6">Aún no hay solicitudes resueltas.</td></tr>';
+}
+$("v-sol").onclick = async e => {
+  const b = e.target.closest("button[data-id]");
+  if (!b) return;
+  b.disabled = true; b.textContent = "Guardando…";
+  try {
+    await setDoc(doc(db, "permisos", b.dataset.id), { estado: b.dataset.e, resueltoPor: yo() }, { merge: true });
+    await cargarExtra(); pintarSol();
+    aviso(b.dataset.e === "aprobado" ? "Solicitud aprobada." : "Solicitud rechazada.");
+  } catch (er) { err("msg", er); pintarSol(); }
+};
+
 // ---- Exportar a Excel ----
 $("xls").onclick = () => {
   const r = [["Nombre completo", "Cédula", "Fecha", "Entrada", "Salida", "Total horas", "Tardanza (min)", "Tiempo extra (min)", "Estado"]];
@@ -405,6 +492,9 @@ $("xls").onclick = () => {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(r), "Planilla");
   XLSX.writeFile(wb, "Planilla_" + $("quin").selectedOptions[0].textContent.replace(/[^\w]+/g, "_") + ".xlsx");
 };
+conCarga("m-guardar", "Guardando…");
+conCarga("p-guardar", "Guardando…");
+conCarga("f-guardar", "Guardando…");
 </script>
 </body>
 </html>
