@@ -57,12 +57,56 @@ body.sinsesion{background:linear-gradient(160deg,#226782,#17495C) fixed}
 .toast b{display:block;font-size:15px}
 .toast em{display:block;font-style:normal;font-size:13px;color:#4F5F52;margin-top:2px}
 @keyframes baja{from{transform:translateY(-16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast{z-index:100}
+.hdr{background:linear-gradient(160deg,#226782,#17495C);border-radius:24px;padding:18px;color:#fff}
+.hdr h1{color:#fff;font-size:24px;margin-top:2px}
+.ib{width:42px;height:42px;border-radius:12px;border:0;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.av{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+.av.big{width:60px;height:60px;background:#226782;font-size:20px}
+.aro{position:relative;width:170px;height:170px;margin:16px auto}
+#marcar{position:relative;z-index:1;width:170px;height:170px;border-radius:50%;font-size:22px;line-height:1.25;padding:0 12px}
+#marcar[data-t="entrada"]{background:linear-gradient(145deg,#1A8A52,#006838);color:#fff;box-shadow:0 10px 24px rgba(0,104,56,.35)}
+#marcar[data-t="salida"]{background:linear-gradient(145deg,#FDB03B,#F29A12);color:#17302A;box-shadow:0 10px 24px rgba(242,154,18,.45)}
+#marcar:disabled{opacity:.8}
+.ring{position:absolute;inset:0;border-radius:50%;background:#FDB03B;pointer-events:none;animation:ring 2.2s ease-out infinite}
+#marcar[data-t="entrada"]+.ring{background:#1FA463}
+@keyframes ring{0%{transform:scale(.95);opacity:.5}100%{transform:scale(1.4);opacity:0}}
+.gps{display:inline-block;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;background:#ECEFE8;color:#3D4A40}
+.gps.si{background:#E4F3EA;color:#0B5B33}.gps.no{background:#FBE0E0;color:#8A1C1C}
+.ghost{display:block;margin:12px auto 0;height:44px;padding:0 20px;border-radius:14px;border:1.5px solid #226782;background:#fff;color:#226782;font:700 14px system-ui,sans-serif;cursor:pointer}
+.prog{height:10px;background:#E6EADF;border-radius:5px;margin-top:10px;overflow:hidden}
+.prog div{height:10px;width:0;background:linear-gradient(90deg,#6A9A35,#006838);transition:width .6s}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ch{background:#fff;border-radius:16px;padding:12px 14px}
+.ch span{font-size:12px;color:#4F5F52}.ch b{display:block;font-size:20px;margin-top:2px}
+.card.lst{padding:6px 16px}
+.r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #E6EADF;font-size:14px}
+.r:last-child{border-bottom:0}
+.m{font-size:12px;color:#4F5F52;margin-top:2px}
+.tg{display:inline-block;margin-top:3px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+.tg.ok{background:#DDEFE0;color:#1F5129}.tg.am{background:#FBE7CC;color:#7A3F08}.tg.az{background:#E3E8F5;color:#27407A}.tg.ro{background:#FBE0E0;color:#8A1C1C}
+h3{font-size:13px;color:#4F5F52;margin:6px 0 8px;font-weight:700}
+.sel{width:100%;height:46px;border:1px solid #C9D2C4;border-radius:12px;padding:0 12px;font-size:16px;background:#fff}
+.velo{position:fixed;inset:0;background:rgba(14,42,51,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:70}
+.velo.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:284px;max-width:84vw;background:#fff;border-radius:0 28px 28px 0;z-index:80;transform:translateX(-105%);transition:transform .3s ease-out;display:flex;flex-direction:column;box-shadow:8px 0 30px rgba(0,0,0,.25)}
+.drawer.open{transform:none}
+.dh{background:linear-gradient(160deg,#226782,#17495C);border-radius:0 28px 0 0;padding:max(40px,env(safe-area-inset-top)) 22px 22px;color:#fff}
+.it{display:flex;align-items:center;gap:14px;height:52px;padding:0 14px;border:0;border-radius:14px;background:none;font:600 15px system-ui,sans-serif;color:#17302A;text-align:left;width:100%;cursor:pointer}
+.it.on{background:#E4F3EA;color:#0B5B33}
+.hoja{position:fixed;left:0;right:0;bottom:0;max-width:430px;margin:0 auto;background:#fff;border-radius:28px 28px 0 0;padding:14px 22px calc(22px + env(safe-area-inset-bottom));z-index:80;transform:translateY(105%);transition:transform .35s ease-out;max-height:92dvh;overflow:auto}
+.hoja.open{transform:none}
+.asa{width:44px;height:5px;border-radius:3px;background:#C9D6CF;margin:0 auto 14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.c{height:38px;padding:0 14px;border-radius:999px;border:1.5px solid #C9D6CF;background:#fff;color:#17302A;font:600 13px system-ui,sans-serif;cursor:pointer}
+.c.on{background:#226782;border-color:#226782;color:#fff}
+.dos{display:flex;gap:12px}.dos>div{flex:1}
+.f{width:100%;height:46px;border:1.5px solid #C9D6CF;border-radius:12px;padding:0 12px;font:500 15px system-ui,sans-serif;color:#17302A;background:#fff;margin-top:6px}
 </style>
 </head>
 <body class="sinsesion">
 <div id="splash"><img src="agroamigos-logo.png" alt="AgroAmigos"></div>
 <div class="wrap">
-<img id="logotop" class="hide" src="agroamigos-logo.png" alt="AgroAmigos" style="height:60px;width:auto;align-self:center">
 
 <section id="login" class="login hide">
 <div class="card">
@@ -81,13 +125,28 @@ body.sinsesion{background:linear-gradient(160deg,#226782,#17495C) fixed}
 </section>
 
 <div id="app" class="stack hide">
-<div class="card" style="display:flex;justify-content:space-between;align-items:center">
-<div><div class="muted">Hola,</div><h1 id="nombre"></h1></div>
-<button class="link" id="salir">Salir</button>
+<div class="hdr">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;align-items:center;gap:12px">
+<button class="ib" id="btn-menu" aria-label="Abrir menú"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+<div style="background:#fff;border-radius:12px;padding:4px 10px"><img src="agroamigos-logo.png" alt="AgroAmigos" style="height:34px;width:auto;display:block"></div>
 </div>
+<div class="av" id="av"></div>
+</div>
+<div style="margin-top:16px;font-size:14px" id="saludo">Hola,</div>
+<h1 id="nombre"></h1>
+</div>
+<div id="v-inicio" class="stack">
 <div class="card" style="text-align:center">
 <div class="muted" id="fecha"></div>
-<button class="btn" id="marcar" style="margin-top:12px" disabled><span class="sp"></span>Cargando…</button>
+<div class="aro"><button class="btn" id="marcar" disabled><span class="sp"></span>Cargando…</button><div class="ring"></div></div>
+<div class="gps" id="gps">Buscando tu ubicación…</div>
+<button class="ghost" id="btn-permiso">Solicitar permiso</button>
+</div>
+<div class="card">
+<div style="display:flex;justify-content:space-between;font-size:13px;color:#4F5F52"><span id="h-ent"></span><b id="h-llev" style="color:#1B2A1E"></b></div>
+<div class="prog"><div id="h-barra"></div></div>
+<div class="muted" id="h-pie" style="margin-top:6px"></div>
 </div>
 <div class="card">
 <div style="display:flex;justify-content:space-between;align-items:baseline"><b>Mi quincena</b><span class="muted" id="qtxt"></span></div>
@@ -99,6 +158,77 @@ body.sinsesion{background:linear-gradient(160deg,#226782,#17495C) fixed}
 <b id="total" style="font-size:20px;color:#2F6B3A">0 h 00</b>
 </div>
 <div class="muted" style="margin-top:10px;text-align:center">El tramo blanco de cada barra es la hora de almuerzo, descontada automáticamente.</div>
+</div>
+</div>
+
+<div id="v-quin" class="stack hide">
+<div class="card" style="padding:14px 16px"><label for="quin" style="margin:0 0 6px">Quincena</label><select id="quin" class="sel"></select></div>
+<div class="grid">
+<div class="ch"><span>Total horas</span><b id="q-h" style="color:#006838">0 h 00</b></div>
+<div class="ch"><span>Tardanzas</span><b id="q-t">0 min</b></div>
+<div class="ch"><span>Tiempo extra</span><b id="q-x">0 h 00</b></div>
+<div class="ch"><span>Ausencias</span><b id="q-a" style="color:#8A1C1C">0</b></div>
+</div>
+<div class="card lst" id="q-lista"></div>
+</div>
+
+<div id="v-perm" class="stack hide">
+<div class="grid">
+<div class="ch"><span>Pendientes</span><b id="p-pend" style="color:#7A3F08">0</b></div>
+<div class="ch"><span>Ausencias</span><b id="p-aus" style="color:#8A1C1C">0</b></div>
+</div>
+<div><h3>PERMISOS</h3><div class="card lst" id="p-lista"></div></div>
+<div><h3>AUSENCIAS DE LA QUINCENA</h3><div class="card lst" id="a-lista"></div></div>
+<div><h3>PRÓXIMOS FERIADOS</h3><div class="card lst" id="f-lista"></div></div>
+</div>
+
+<div id="v-perf" class="stack hide">
+<div class="card" style="display:flex;align-items:center;gap:14px">
+<div class="av big" id="av2"></div>
+<div><b id="nombre2" style="font-size:18px"></b><div class="muted" id="ced2"></div></div>
+</div>
+<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+<div><b id="rl2" style="font-size:15px">Recordar mi cédula</b><div class="muted">Aparece lista al iniciar sesión.</div></div>
+<button type="button" class="sw" id="rec2" role="switch" aria-checked="false" aria-labelledby="rl2"><span></span></button>
+</div>
+</div>
+
+<div id="velo" class="velo"></div>
+<nav id="drawer" class="drawer" aria-label="Menú">
+<div class="dh"><div style="font-size:18px;font-weight:800">MarAgroAmigos</div><div style="font-size:13px;margin-top:2px">Marcación AgroAmigos</div></div>
+<div style="padding:14px;display:flex;flex-direction:column;gap:4px">
+<button class="it on" data-v="inicio"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"></path></svg>Inicio</button>
+<button class="it" data-v="quin"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Mi quincena</button>
+<button class="it" data-v="perm"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M9 12h7M9 16h7"></path></svg>Permisos y ausencias</button>
+<button class="it" data-v="perf"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-5 15-5 16 0"></path></svg>Mi perfil</button>
+</div>
+<div style="margin-top:auto;padding:16px 22px 26px;border-top:1px solid #E6EADF;display:flex;justify-content:space-between;align-items:center">
+<div class="muted">MarAgroAmigos</div>
+<button id="salir" aria-label="Cerrar sesión" style="width:46px;height:46px;border-radius:14px;border:0;background:#FBE0E0;color:#8A1C1C;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5M21 12H9"></path></svg></button>
+</div>
+</nav>
+
+<div id="velo2" class="velo"></div>
+<div id="hoja" class="hoja" role="dialog" aria-label="Solicitar permiso">
+<div class="asa"></div>
+<h1 style="font-size:22px">Solicitar permiso</h1>
+<div class="muted">El administrador la revisará y verás el estado en Permisos y ausencias.</div>
+<div style="font-size:13px;font-weight:700;margin-top:14px">Tipo</div>
+<div class="chips">
+<button type="button" class="c on" data-t="Retirarme antes">Retirarme antes</button>
+<button type="button" class="c" data-t="Llegar tarde">Llegar tarde</button>
+<button type="button" class="c" data-t="Ausentarme el día">Ausentarme el día</button>
+<button type="button" class="c" data-t="Accidente laboral">Accidente laboral</button>
+<button type="button" class="c" data-t="Otro">Otro</button>
+</div>
+<div class="dos">
+<div><label for="w-fec">Fecha</label><input type="date" id="w-fec" class="f"></div>
+<div id="w-hora"><label for="w-h">Hora</label><input type="time" id="w-h" class="f"></div>
+</div>
+<label for="w-mot">Motivo</label>
+<textarea id="w-mot" class="f" style="height:84px;padding:10px 12px;resize:none" placeholder="Cuéntale al administrador qué pasó"></textarea>
+<button class="btn" id="w-enviar" style="margin-top:16px;height:56px;font-size:17px">Enviar solicitud</button>
+<button class="link" id="w-cancel" style="width:100%;margin-top:6px">Cancelar</button>
 </div>
 </div>
 </div>
@@ -184,7 +314,6 @@ $("salir").onclick = () => signOut(auth);
 onAuthStateChanged(auth, async u => {
   $("splash").classList.add("hide");
   document.body.classList.toggle("sinsesion", !u);
-  $("logotop").classList.toggle("hide", !u);
   $("login").classList.toggle("hide", !!u);
   $("app").classList.toggle("hide", !u);
   if (!u) return;
@@ -210,6 +339,7 @@ async function cargar() {
   const snap = await getDocs(query(collection(db, "marcaciones"), where("cedula", "==", ced)));
   marcas = snap.docs.map(d => d.data()).filter(m => m.hora).map(m => ({ tipo: m.tipo, ms: m.hora.toMillis() }));
   pintar();
+  extra();
 }
 
 function pintar() {
@@ -262,7 +392,7 @@ $("marcar").onclick = () => {
   b.innerHTML = '<span class="sp"></span>Buscando ubicación…';
   if (!navigator.geolocation) return fin("Tu dispositivo no permite usar la ubicación.", "err");
 
-  navigator.geolocation.getCurrentPosition(async pos => {
+  ubicar(async pos => {
     const la = pos.coords.latitude, lo = pos.coords.longitude, pr = pos.coords.accuracy;
     const dist = metros(la, lo, lugar.lat, lugar.lng);
     if (pr > lugar.precisionMax) return fin("Ubicación poco precisa (" + Math.round(pr) + " m). Sal a un lugar abierto e intenta de nuevo.", "err");
@@ -279,8 +409,207 @@ $("marcar").onclick = () => {
     } catch (er) {
       fin("No se pudo registrar. Revisa la hora de tu teléfono y tu conexión.", "err");
     }
-  }, er => fin(er.code === 1 ? "Debes permitir el acceso a la ubicación." : "No se pudo obtener la ubicación.", "err"),
-  { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+  }, er => fin(er.code === 1 ? "Debes permitir el acceso a la ubicación." : "No se pudo obtener la ubicación.", "err"));
+};
+
+// ---------- Menú, vistas y permisos ----------
+const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const diasSem = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const mins = ms => { const d = loc(ms); return d.getUTCHours() * 60 + d.getUTCMinutes(); };
+const hhmm = s => { const q = s.split(":"); return +q[0] * 60 + +q[1]; };
+const iso = (y, m, d) => y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+let permisos = [], feriados = [], ferNom = {}, ultima = null, vigia = null, vista = "inicio", tipoSel = "Retirarme antes";
+
+// Ubicación: se busca desde que se abre la app para que marcar sea rápido
+function calentar() {
+  if (vigia !== null || !navigator.geolocation) return;
+  vigia = navigator.geolocation.watchPosition(p => { ultima = p; estadoGps(); }, () => {}, { enableHighAccuracy: true, maximumAge: 5000 });
+}
+function ubicar(ok, mal) {
+  if (ultima && Date.now() - ultima.timestamp < 15000 && ultima.coords.accuracy <= (lugar.precisionMax || 50)) return ok(ultima);
+  navigator.geolocation.getCurrentPosition(ok, mal, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+}
+function estadoGps() {
+  const e = $("gps");
+  if (!ultima || !lugar) { e.textContent = "Buscando tu ubicación…"; e.className = "gps"; return; }
+  const d = metros(ultima.coords.latitude, ultima.coords.longitude, lugar.lat, lugar.lng), pr = Math.round(ultima.coords.accuracy);
+  const dentro = d <= lugar.radio, preciso = pr <= lugar.precisionMax;
+  e.textContent = dentro ? (preciso ? "Dentro del área · precisión " + pr + " m" : "Dentro del área · señal débil (" + pr + " m)") : "Fuera del área · a " + Math.round(d) + " m del punto";
+  e.className = "gps " + (dentro && preciso ? "si" : "no");
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { if (vigia !== null) { navigator.geolocation.clearWatch(vigia); vigia = null; } }
+  else if (!$("app").classList.contains("hide")) { calentar(); hoyCard(); }
+});
+
+// Menú y vistas
+function menu(abierto) { $("drawer").classList.toggle("open", abierto); $("velo").classList.toggle("open", abierto); }
+function mostrar(v) {
+  vista = v;
+  ["inicio", "quin", "perm", "perf"].forEach(x => $("v-" + x).classList.toggle("hide", x !== v));
+  document.querySelectorAll(".it").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  menu(false);
+  window.scrollTo(0, 0);
+  if (v === "quin") pintarQuin();
+  if (v === "perm") cargarPerm();
+  if (v === "perf") pintarPerf();
+}
+$("btn-menu").onclick = () => menu(true);
+$("velo").onclick = () => menu(false);
+document.querySelectorAll(".it").forEach(b => { b.onclick = () => mostrar(b.dataset.v); });
+
+// Datos de la pantalla de inicio
+function extra() {
+  const nom = $("nombre").textContent || "";
+  const ini = nom.split(/\s+/).filter(Boolean).slice(0, 2).map(s => s[0]).join("").toUpperCase();
+  $("av").textContent = ini; $("av2").textContent = ini;
+  const h = loc(Date.now()).getUTCHours();
+  $("saludo").textContent = h < 12 ? "Buenos días," : h < 18 ? "Buenas tardes," : "Buenas noches,";
+  hoyCard(); calentar(); estadoGps();
+  if (!extra.listo) { extra.listo = true; llenarQuin(); cargarPerm(); setInterval(hoyCard, 30000); }
+}
+function hoyCard() {
+  if (!lugar) return;
+  const k = dkey(loc(Date.now())), x = {};
+  marcas.forEach(m => { if (dkey(loc(m.ms)) === k) x[m.tipo] = m.ms; });
+  const sem = loc(Date.now()).getUTCDay(), esFin = sem === 0 || sem === 6;
+  const meta = hhmm(lugar.horaSalida || "17:00") - hhmm(lugar.horaEntrada || "08:00") - (lugar.almuerzoMin || 60);
+  if (!x.entrada) { $("h-ent").textContent = "Aún no marcas entrada"; $("h-llev").textContent = ""; $("h-barra").style.width = "0%"; $("h-pie").textContent = esFin ? "Fin de semana: se cuenta como tiempo extra" : "Jornada de " + fmt(meta); return; }
+  const fin = x.salida || Date.now(), e = mins(x.entrada), f = mins(fin);
+  const l1 = hhmm(lugar.salidaAlmuerzo || "12:00"), l2 = hhmm(lugar.regresoAlmuerzo || "13:00");
+  const neto = Math.max(0, f - e - (esFin ? 0 : Math.max(0, Math.min(f, l2) - Math.max(e, l1))));
+  $("h-ent").textContent = "Entrada " + hm(loc(x.entrada)) + (x.salida ? " · Salida " + hm(loc(x.salida)) : "");
+  $("h-llev").textContent = (x.salida ? "Total " : "Llevas ") + fmt(neto);
+  $("h-barra").style.width = (esFin ? 100 : Math.min(100, neto / meta * 100)) + "%";
+  $("h-pie").textContent = esFin ? "Fin de semana: se cuenta como tiempo extra" : x.salida ? "Jornada completada" : neto >= meta ? "Jornada cumplida" : "Te faltan " + fmt(meta - neto);
+}
+
+// Mi quincena
+function calcQuin(y, mo, q) {
+  const ini = q === 1 ? 1 : 16, fin = q === 1 ? 15 : new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+  const hoy = loc(Date.now()), esAhora = hoy.getUTCFullYear() === y && hoy.getUTCMonth() === mo;
+  const dias = {};
+  marcas.forEach(m => { const k = dkey(loc(m.ms)); (dias[k] = dias[k] || {})[m.tipo] = m.ms; });
+  const perm = {};
+  permisos.filter(x => x.estado !== "pendiente" && x.estado !== "rechazado").forEach(x => { perm[x.fecha] = x; });
+  const aE = hhmm(lugar.horaEntrada || "08:00"), aS = hhmm(lugar.horaSalida || "17:00"), alm = lugar.almuerzoMin || 60;
+  const r = { filas: [], h: 0, t: 0, x: 0, aus: 0 };
+  for (let d = ini; d <= fin; d++) {
+    const sem = new Date(Date.UTC(y, mo, d)).getUTCDay(), esFin = sem === 0 || sem === 6;
+    const dia = dias[y + "-" + (mo + 1) + "-" + d], pr = perm[iso(y, mo, d)];
+    const f = { fecha: diasSem[sem] + " " + d + " " + meses[mo], det: "", tot: "—", est: "", cl: "" };
+    if (dia) {
+      f.det = (dia.entrada ? hm(loc(dia.entrada)) : "—") + " – " + (dia.salida ? hm(loc(dia.salida)) : "—");
+      if (dia.entrada && dia.salida) {
+        const h = Math.max(0, (dia.salida - dia.entrada) / 6e4 - (esFin ? 0 : alm));
+        const e = mins(dia.entrada), s = mins(dia.salida);
+        let t = 0, xx = 0;
+        if (esFin) xx = h; else { t = Math.max(0, e - aE); xx = Math.max(0, aE - e) + Math.max(0, s - aS); }
+        r.h += h; r.t += t; r.x += xx;
+        f.tot = fmt(h);
+        f.est = esFin ? "Fin de semana" : t > 0 ? "Tardanza " + Math.round(t) + " min" : xx > 0 ? "Extra " + Math.round(xx) + " min" : "Completo";
+        f.cl = esFin || (t <= 0 && xx > 0) ? "az" : t > 0 ? "am" : "ok";
+      } else { f.est = "Falta " + (dia.entrada ? "salida" : "entrada"); f.cl = "am"; }
+    } else if (pr) { f.det = pr.tipo || pr.motivo || ""; f.est = "Permiso"; f.cl = "az"; }
+    else if (!esFin && !feriados.includes(iso(y, mo, d)) && (!esAhora || d < hoy.getUTCDate())) { f.det = "Sin marcación"; f.est = "Ausencia"; f.cl = "ro"; r.aus++; }
+    else continue;
+    r.filas.push(f);
+  }
+  return r;
+}
+function llenarQuin() {
+  const t = loc(Date.now());
+  let y = t.getUTCFullYear(), mo = t.getUTCMonth(), q = t.getUTCDate() <= 15 ? 1 : 2, o = "";
+  for (let i = 0; i < 8; i++) {
+    const ini = q === 1 ? 1 : 16, fin = q === 1 ? 15 : new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+    o += '<option value="' + y + "-" + mo + "-" + q + '">' + ini + " – " + fin + " " + meses[mo] + " " + y + "</option>";
+    if (q === 2) q = 1; else { q = 2; mo--; if (mo < 0) { mo = 11; y--; } }
+  }
+  $("quin").innerHTML = o;
+}
+function pintarQuin() {
+  if (!lugar || !$("quin").value) return;
+  const p = $("quin").value.split("-").map(Number), r = calcQuin(p[0], p[1], p[2]);
+  $("q-h").textContent = fmt(r.h);
+  $("q-t").textContent = Math.round(r.t) + " min";
+  $("q-x").textContent = fmt(r.x);
+  $("q-a").textContent = r.aus;
+  $("q-lista").innerHTML = r.filas.map(f => '<div class="r"><div><b>' + f.fecha + '</b><div class="m">' + esc(f.det) + '</div></div><div style="text-align:right"><b>' + f.tot + '</b><div><span class="tg ' + f.cl + '">' + esc(f.est) + "</span></div></div></div>").join("") || '<div class="m" style="padding:14px 0">Sin registros en esta quincena.</div>';
+}
+$("quin").onchange = pintarQuin;
+
+// Permisos y ausencias
+async function cargarPerm() {
+  try {
+    const r = await Promise.all([getDocs(query(collection(db, "permisos"), where("cedula", "==", ced))), getDocs(collection(db, "feriados"))]);
+    permisos = r[0].docs.map(d => ({ id: d.id, ...d.data() }));
+    feriados = r[1].docs.map(d => d.id);
+    ferNom = {}; r[1].docs.forEach(d => { ferNom[d.id] = d.data().nombre || "Feriado"; });
+  } catch (er) { setMsg("No se pudieron cargar tus permisos. Revisa tu conexión.", "err"); }
+  pintarPerm();
+  if (vista === "quin") pintarQuin();
+}
+function pintarPerm() {
+  const est = { pendiente: ["Pendiente", "am"], rechazado: ["Rechazado", "ro"] };
+  const lista = permisos.slice().sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+  $("p-lista").innerHTML = lista.map(x => {
+    const e = est[x.estado] || ["Aprobado", "ok"], f = String(x.fecha).split("-").map(Number);
+    return '<div class="r"><div><b>' + diasSem[new Date(Date.UTC(f[0], f[1] - 1, f[2])).getUTCDay()] + " " + f[2] + " " + meses[f[1] - 1] + '</b><div class="m">' + esc(x.tipo ? x.tipo + (x.hora ? " · " + x.hora : "") : (x.motivo || "")) + '</div></div><span class="tg ' + e[1] + '">' + e[0] + "</span></div>";
+  }).join("") || '<div class="m" style="padding:14px 0">No tienes permisos registrados.</div>';
+  $("p-pend").textContent = lista.filter(x => x.estado === "pendiente").length;
+  if (!lugar) return;
+  const t = loc(Date.now()), r = calcQuin(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate() <= 15 ? 1 : 2);
+  const aus = r.filas.filter(f => f.est === "Ausencia");
+  $("p-aus").textContent = aus.length;
+  $("a-lista").innerHTML = aus.map(f => '<div class="r"><div><b>' + f.fecha + '</b><div class="m">Sin marcación ni permiso</div></div><span class="tg ro">Ausencia</span></div>').join("") || '<div class="m" style="padding:14px 0">No tienes ausencias en esta quincena.</div>';
+  const hoyI = iso(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate());
+  const prox = feriados.filter(f => f >= hoyI).sort().slice(0, 3);
+  $("f-lista").innerHTML = prox.map(f => { const q = f.split("-").map(Number); return '<div class="r"><div><b>' + esc(ferNom[f]) + '</b><div class="m">' + q[2] + " " + meses[q[1] - 1] + " " + q[0] + '</div></div><span class="tg am">Feriado</span></div>'; }).join("") || '<div class="m" style="padding:14px 0">No hay feriados próximos registrados.</div>';
+}
+
+// Solicitar permiso
+document.querySelectorAll(".c").forEach(b => {
+  b.onclick = () => {
+    tipoSel = b.dataset.t;
+    document.querySelectorAll(".c").forEach(x => x.classList.toggle("on", x === b));
+    $("w-hora").classList.toggle("hide", tipoSel !== "Retirarme antes" && tipoSel !== "Llegar tarde");
+  };
+});
+const cerrarHoja = () => { $("hoja").classList.remove("open"); $("velo2").classList.remove("open"); };
+$("btn-permiso").onclick = () => {
+  const t = loc(Date.now());
+  $("w-fec").value = iso(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate());
+  $("w-mot").value = "";
+  $("hoja").classList.add("open"); $("velo2").classList.add("open");
+};
+$("w-cancel").onclick = cerrarHoja;
+$("velo2").onclick = cerrarHoja;
+$("w-enviar").onclick = async () => {
+  const f = $("w-fec").value, mot = $("w-mot").value.trim(), b = $("w-enviar");
+  if (!f) return aviso("mal", "Elige la fecha", "Indica para qué día es el permiso.");
+  if (mot.length < 3) return aviso("mal", "Escribe el motivo", "Cuéntale al administrador por qué lo necesitas.");
+  cargando(b, true, "Enviando…");
+  try {
+    await setDoc(doc(db, "permisos", ced + "_" + f), { cedula: ced, fecha: f, tipo: tipoSel, hora: $("w-hora").classList.contains("hide") ? "" : $("w-h").value, motivo: mot, estado: "pendiente", creadoPor: ced });
+    cerrarHoja();
+    aviso("ok", "Solicitud enviada", "El administrador la revisará.");
+    cargarPerm();
+  } catch (er) {
+    aviso("mal", "No se pudo enviar", er.code === "permission-denied" ? "Ya hay un permiso para esa fecha o no tienes acceso." : "Revisa tu conexión e intenta de nuevo.");
+  }
+  cargando(b, false);
+};
+
+// Mi perfil
+function pintarPerf() {
+  $("nombre2").textContent = $("nombre").textContent;
+  $("ced2").textContent = "Cédula " + ced.toUpperCase();
+  $("rec2").setAttribute("aria-checked", localStorage.getItem("ced") ? "true" : "false");
+}
+$("rec2").onclick = () => {
+  if ($("rec2").getAttribute("aria-checked") === "true") localStorage.removeItem("ced"); else localStorage.setItem("ced", ced.toUpperCase());
+  pintarPerf();
 };
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
