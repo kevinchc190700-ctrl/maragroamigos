@@ -35,23 +35,49 @@ input[type=text],input[type=password]{width:100%;height:50px;border:1px solid #C
 .axis{position:relative;height:16px;margin:2px 66px 0 56px;font-size:12px;color:#4F5F52}
 .axis i{position:absolute;font-style:normal}
 .hide{display:none!important}
+body.sinsesion{background:linear-gradient(160deg,#226782,#17495C) fixed}
+.login{position:fixed;inset:0;overflow:auto;display:flex;flex-direction:column;align-items:center;padding:24px;z-index:10}
+.login .card{width:100%;max-width:382px;margin-top:auto;border-radius:28px;padding:26px 22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.login h1{text-align:center;margin:10px 0 0}
+.pie{margin:20px 0 auto;font-size:12px;color:#fff;text-align:center}
+#splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#F6F7F2;z-index:50}
+#splash img{height:84px;width:auto;animation:late 1.4s ease-in-out infinite}
+@keyframes late{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.06);opacity:.7}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sp{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-4px;margin-right:10px}
+.btn.cargando{background:#3F8A62;cursor:default}
+.sw{flex:none;width:52px;height:32px;border:0;border-radius:16px;background:#B7C4BC;position:relative;padding:0;cursor:pointer;transition:background .2s}
+.sw span{position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform .2s}
+.sw[aria-checked="true"]{background:#006838}
+.sw[aria-checked="true"] span{transform:translateX(20px)}
+.toast{position:fixed;top:max(14px,env(safe-area-inset-top));left:16px;right:16px;max-width:398px;margin:0 auto;z-index:60;display:flex;gap:14px;align-items:center;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 8px 22px rgba(23,48,42,.18);border-left:6px solid #1FA463;animation:baja .45s ease-out both}
+.toast.mal{border-left-color:#C62828}
+.toast .i{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex:none;background:#1FA463;color:#fff}
+.toast.mal .i{background:#C62828}
+.toast b{display:block;font-size:15px}
+.toast em{display:block;font-style:normal;font-size:13px;color:#4F5F52;margin-top:2px}
+@keyframes baja{from{transform:translateY(-16px);opacity:0}to{transform:translateY(0);opacity:1}}
 </style>
 </head>
-<body>
+<body class="sinsesion">
+<div id="splash"><img src="agroamigos-logo.png" alt="AgroAmigos"></div>
 <div class="wrap">
-<img src="agroamigos-logo.png" alt="AgroAmigos" style="height:60px;width:auto;align-self:center">
+<img id="logotop" class="hide" src="agroamigos-logo.png" alt="AgroAmigos" style="height:60px;width:auto;align-self:center">
 
-<section id="login" class="card">
+<section id="login" class="login hide">
+<div class="card">
+<div style="text-align:center"><img src="agroamigos-logo.png" alt="AgroAmigos" style="height:84px;width:auto"></div>
 <h1>Iniciar sesión</h1>
 <form id="form">
 <label for="ced">Número de cédula</label>
 <input type="text" id="ced" autocomplete="username" autocapitalize="none" autocorrect="off" required>
 <label for="pass">Contraseña</label>
 <input type="password" id="pass" autocomplete="current-password" required>
-<label class="chk"><input type="checkbox" id="recordar"> Recordar mi cédula</label>
-<button class="btn" type="submit">Entrar</button>
-<div class="msg" id="lmsg"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 18px;font-size:14px"><span id="rcl" style="font-weight:500">Recordar mi cédula</span><button type="button" class="sw" id="recordar" role="switch" aria-checked="false" aria-labelledby="rcl"><span></span></button></div>
+<button class="btn" id="entrar" type="submit">Entrar</button>
 </form>
+</div>
+<div class="pie">MarAgroAmigos · AgroAmigos</div>
 </section>
 
 <div id="app" class="stack hide">
@@ -61,8 +87,7 @@ input[type=text],input[type=password]{width:100%;height:50px;border:1px solid #C
 </div>
 <div class="card" style="text-align:center">
 <div class="muted" id="fecha"></div>
-<button class="btn" id="marcar" style="margin-top:12px" disabled>Cargando…</button>
-<div class="msg" id="msg"></div>
+<button class="btn" id="marcar" style="margin-top:12px" disabled><span class="sp"></span>Cargando…</button>
 </div>
 <div class="card">
 <div style="display:flex;justify-content:space-between;align-items:baseline"><b>Mi quincena</b><span class="muted" id="qtxt"></span></div>
@@ -104,7 +129,31 @@ const dkey = d => d.getUTCFullYear() + "-" + (d.getUTCMonth() + 1) + "-" + d.get
 const hm = d => d.getUTCHours() + ":" + String(d.getUTCMinutes()).padStart(2, "0");
 const dec = d => d.getUTCHours() + d.getUTCMinutes() / 60;
 const fmt = min => { const m = Math.round(min); return Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0"); };
-const setMsg = (t, c) => { $("msg").textContent = t; $("msg").className = "msg " + (c || ""); };
+function aviso(tipo, titulo, texto) {
+  const viejo = document.querySelector(".toast");
+  if (viejo) viejo.remove();
+  const t = document.createElement("div");
+  t.className = "toast " + tipo;
+  t.setAttribute("role", "status");
+  t.innerHTML = '<div class="i">' + (tipo === "mal" ? "✕" : "✓") + '</div><div><b></b><em></em></div>';
+  t.querySelector("b").textContent = titulo;
+  t.querySelector("em").textContent = texto || "";
+  t.onclick = () => t.remove();
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4500);
+  if (tipo === "ok" && navigator.vibrate) navigator.vibrate(60);
+}
+const setMsg = (t, c) => {
+  if (!c) return;
+  const i = t.indexOf(". ");
+  aviso(c === "err" ? "mal" : "ok", (i > 0 ? t.slice(0, i) : t).replace(/\.$/, ""), i > 0 ? t.slice(i + 2) : "");
+};
+const cargando = (b, on, texto) => {
+  if (on) { b.dataset.txt = b.textContent; b.innerHTML = '<span class="sp"></span>' + texto; }
+  else b.textContent = b.dataset.txt || b.textContent;
+  b.disabled = on;
+  b.classList.toggle("cargando", on);
+};
 const metros = (a, b, c, d) => {
   const r = x => x * Math.PI / 180, R = 6371000, dl = r(c - a), dn = r(d - b);
   const h = Math.sin(dl / 2) ** 2 + Math.cos(r(a)) * Math.cos(r(c)) * Math.sin(dn / 2) ** 2;
@@ -113,30 +162,32 @@ const metros = (a, b, c, d) => {
 
 // ---- Inicio de sesión ----
 $("ced").value = localStorage.getItem("ced") || "";
-$("recordar").checked = !!localStorage.getItem("ced");
+$("recordar").setAttribute("aria-checked", localStorage.getItem("ced") ? "true" : "false");
+$("recordar").onclick = () => $("recordar").setAttribute("aria-checked", $("recordar").getAttribute("aria-checked") === "true" ? "false" : "true");
 
 $("form").addEventListener("submit", async e => {
   e.preventDefault();
-  $("lmsg").textContent = "Entrando…";
-  $("lmsg").className = "msg";
+  cargando($("entrar"), true, "Entrando…");
   try {
     await signInWithEmailAndPassword(auth, norm($("ced").value) + DOMINIO, $("pass").value);
-    if ($("recordar").checked) localStorage.setItem("ced", $("ced").value.trim());
+    if ($("recordar").getAttribute("aria-checked") === "true") localStorage.setItem("ced", $("ced").value.trim());
     else localStorage.removeItem("ced");
     $("pass").value = "";
   } catch (er) {
     const malos = ["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found", "auth/invalid-email"];
-    $("lmsg").textContent = malos.includes(er.code) ? "Cédula o contraseña incorrecta." : "No se pudo entrar. Revisa tu conexión.";
-    $("lmsg").className = "msg err";
+    aviso("mal", malos.includes(er.code) ? "Cédula o contraseña incorrecta" : "No se pudo entrar", malos.includes(er.code) ? "Revisa tus datos e intenta de nuevo." : "Revisa tu conexión a internet.");
   }
+  cargando($("entrar"), false);
 });
 $("salir").onclick = () => signOut(auth);
 
 onAuthStateChanged(auth, async u => {
+  $("splash").classList.add("hide");
+  document.body.classList.toggle("sinsesion", !u);
+  $("logotop").classList.toggle("hide", !u);
   $("login").classList.toggle("hide", !!u);
   $("app").classList.toggle("hide", !u);
   if (!u) return;
-  $("lmsg").textContent = "";
   ced = u.email.split("@")[0];
   try {
     const [c, l] = await Promise.all([getDoc(doc(db, "colaboradores", ced)), getDoc(doc(db, "config", "lugar"))]);
@@ -206,9 +257,9 @@ $("marcar").onclick = () => {
   const tipo = $("marcar").dataset.t;
   if (!tipo) return;
   const b = $("marcar");
-  const fin = (t, c) => { setMsg(t, c); b.disabled = false; };
+  const fin = (t, c) => { setMsg(t, c); pintar(); };
   b.disabled = true;
-  setMsg("Obteniendo tu ubicación…", "");
+  b.innerHTML = '<span class="sp"></span>Buscando ubicación…';
   if (!navigator.geolocation) return fin("Tu dispositivo no permite usar la ubicación.", "err");
 
   navigator.geolocation.getCurrentPosition(async pos => {
@@ -217,6 +268,7 @@ $("marcar").onclick = () => {
     if (pr > lugar.precisionMax) return fin("Ubicación poco precisa (" + Math.round(pr) + " m). Sal a un lugar abierto e intenta de nuevo.", "err");
     if (dist > lugar.radio) return fin("Estás fuera del área de trabajo (a " + Math.round(dist) + " m del punto).", "err");
     try {
+      b.innerHTML = '<span class="sp"></span>Registrando…';
       const id = ced + "_" + dkey(loc(Date.now())) + "_" + tipo;
       await setDoc(doc(db, "marcaciones", id), {
         cedula: ced, tipo: tipo, hora: serverTimestamp(),
